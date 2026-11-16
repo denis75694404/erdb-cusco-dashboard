@@ -1114,32 +1114,34 @@ dash.draw('riesgos', function (el) {
     ['Ecorregiones y vacíos de conservación','El 99 % de los sitios prioritarios del Sernanp está fuera de las áreas protegidas.']];
   var stage=document.getElementById('ec-intro-stage'), h=document.getElementById('ec-intro-h'), p=document.getElementById('ec-intro-p'), bar=document.getElementById('ec-intro-bar');
   var mute=document.getElementById('ec-intro-mute'), skip=document.getElementById('ec-intro-skip'), play=document.getElementById('ec-intro-play');
-  if(play) play.hidden=true;
   var imgs=figs.map(function(f){ var im=new Image(); im.src=f.getAttribute('src'); im.alt=f.getAttribute('alt')||''; stage.appendChild(im); return im; });
   var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var STEP=reduce?1500:2500, TOTAL=STEP*imgs.length, done=false, timers=[], t0=performance.now(), sound=false;
+  var STEP=reduce?1500:2500, TOTAL=STEP*imgs.length, done=false, begun=false, timers=[], sound=false;
   box.hidden=false; document.documentElement.style.overflow='hidden';
+  play.innerHTML='▶ Entrar al tablero<small>Presentación con música · 8 segundos</small>';
+  mute.hidden=true;
   function show(i){ imgs.forEach(function(im,k){ im.classList.toggle('on',k===i); }); if(caps[i]){ h.textContent=caps[i][0]; p.textContent=caps[i][1]; } }
   function close(){ if(done) return; done=true; timers.forEach(clearTimeout); if(window.ecAndina) window.ecAndina.stop();
     box.classList.add('is-out'); document.documentElement.style.overflow=''; setTimeout(function(){ box.hidden=true; }, 650); }
-  function setMute(state){ mute.hidden=false; if(state==='on'){ mute.textContent='♪ Música: sí'; mute.classList.remove('is-ask'); }
-    else if(state==='ask'){ mute.textContent='♪ Activar música'; mute.classList.add('is-ask'); }
-    else { mute.textContent='♪ Música: no'; mute.classList.remove('is-ask'); } }
-  function tryMusic(){ if(!window.ecAndina || sound || done) return; var off=(performance.now()-t0)/1000;
-    window.ecAndina.play(off).then(function(ok){ if(done) return; if(ok){ sound=true; setMute('on'); } else setMute('ask'); }).catch(function(){ setMute('ask'); }); }
-  /* los mapas arrancan de inmediato */
+  function begin(){ if(begun||done) return; begun=true; play.hidden=true;
+    if(sound){ mute.hidden=false; mute.textContent='♪ Música: sí'; }
+    show(0); imgs.forEach(function(_,i){ if(i) timers.push(setTimeout(function(){ show(i); }, i*STEP)); });
+    bar.style.transition='width '+TOTAL+'ms linear'; requestAnimationFrame(function(){ requestAnimationFrame(function(){ bar.style.width='100%'; }); });
+    timers.push(setTimeout(close, TOTAL+300)); }
+  function enter(){ if(begun) return; if(!window.ecAndina){ begin(); return; }
+    window.ecAndina.play(0).then(function(ok){ sound=!!ok; begin(); }).catch(function(){ begin(); }); }
   show(0);
-  imgs.forEach(function(_,i){ if(i) timers.push(setTimeout(function(){ show(i); }, i*STEP)); });
-  bar.style.transition='width '+TOTAL+'ms linear'; requestAnimationFrame(function(){ requestAnimationFrame(function(){ bar.style.width='100%'; }); });
-  timers.push(setTimeout(close, TOTAL+300));
-  timers.push(setTimeout(close, 15000));
-  /* musica: automatica si el navegador lo permite; si no, con el primer clic o tecla */
-  if(window.ecAndina){ setMute('ask'); tryMusic(); } else mute.hidden=true;
-  mute.addEventListener('click', function(e){ e.stopPropagation(); if(sound){ window.ecAndina.stop(); sound=false; setMute('off'); } else tryMusic(); });
+  /* si el navegador ya permite sonido, arranca solo; si no, el boton de entrada es el gesto que activa la musica */
+  if(window.ecAndina){
+    window.ecAndina.play(0).then(function(ok){ if(done) return; if(ok){ sound=true; begin(); } else { play.hidden=false; try{ play.focus({preventScroll:true}); }catch(e){} } })
+      .catch(function(){ play.hidden=false; });
+  } else begin();
+  play.addEventListener('click', function(e){ e.stopPropagation(); enter(); });
+  box.addEventListener('click', function(e){ if(e.target===skip||e.target===mute) return; if(!begun) enter(); });
+  mute.addEventListener('click', function(e){ e.stopPropagation(); if(sound&&window.ecAndina){ window.ecAndina.stop(); sound=false; mute.textContent='♪ Música: no'; } });
   skip.addEventListener('click', function(e){ e.stopPropagation(); close(); });
-  box.addEventListener('click', function(e){ if(e.target===skip) return; if(!sound) tryMusic(); });
   document.addEventListener('keydown', function onk(e){ if(done){ document.removeEventListener('keydown', onk); return; }
-    if(e.key==='Escape') close(); else if(!sound) tryMusic(); });
+    if(e.key==='Escape') close(); else if(!begun && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); enter(); } });
 })();
 </script>
 

@@ -110,7 +110,7 @@ window.dash = (function () {
 .ec-ms-main{all:unset;cursor:zoom-in;display:block;position:relative;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 14px 36px rgba(0,0,0,.4);transition:transform .4s}
 .ec-ms-main:hover{transform:translateY(-3px)}
 .ec-ms-main img{display:block;width:100%;height:auto;animation:ecReveal .9s ease-out both}
-@keyframes ecReveal{from{opacity:.25;transform:scale(1.03)}to{opacity:1;transform:scale(1)}}
+@keyframes ecReveal{from{transform:scale(1.03)}to{transform:scale(1)}}
 .ec-ms-badge{display:inline-block;margin:0 0 8px;background:#0069B4;color:#fff;font-size:11px;font-weight:700;letter-spacing:.06em;padding:4px 8px;border-radius:6px}
 .ec-tabs .ec-tab.ec-tab-new{position:relative}
 .ec-tabs .ec-tab.ec-tab-new::after{content:"";position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:#ffb703;box-shadow:0 0 0 0 rgba(255,183,3,.7);animation:ecPulse 1.8s infinite}
@@ -130,20 +130,23 @@ window.dash = (function () {
 .ec-intro-skip:hover,.ec-intro-mute:hover,.ec-intro-skip:focus-visible,.ec-intro-mute:focus-visible{background:rgba(255,255,255,.15);outline:none}
 .ec-intro-stage{position:relative;min-height:0;margin:0 clamp(10px,3vw,40px)}
 .ec-intro-stage img{position:absolute;inset:0;margin:auto;max-width:100%;max-height:100%;width:auto;height:auto;border-radius:10px;
-  box-shadow:0 18px 50px rgba(0,0,0,.5);opacity:0;transform:scale(1.04);transition:opacity .5s ease,transform 2.4s ease-out;will-change:opacity,transform}
-.ec-intro-stage img.on{opacity:1;transform:scale(1)}
+  box-shadow:0 12px 34px rgba(0,0,0,.45);display:none}
+.ec-intro-stage img.on{display:block;animation:ecKen 2.4s ease-out}
+@keyframes ecKen{from{transform:scale(1.04)}to{transform:scale(1)}}
 .ec-intro-play{all:unset;cursor:pointer;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;background:#ffd166;color:#04121f;
   font-weight:800;font-size:clamp(16px,2.2vw,22px);border-radius:999px;padding:16px 28px;box-shadow:0 10px 40px rgba(0,0,0,.45);text-align:center}
 .ec-intro-play small{display:block;font-weight:600;font-size:12px;opacity:.75;margin-top:2px}
 .ec-intro-play:hover,.ec-intro-play:focus-visible{background:#ffe08f;outline:3px solid #fff;outline-offset:3px}
 .ec-intro-play[hidden]{display:none}
 .ec-intro-mute[hidden],.ec-intro-skip[hidden]{display:none}
+.ec-intro-mute.is-ask{background:#ffd166;color:#04121f;border-color:#ffd166;font-weight:800;animation:ecAsk 1.4s ease-in-out infinite}
+@keyframes ecAsk{0%,100%{box-shadow:0 0 0 0 rgba(255,209,102,.6)}50%{box-shadow:0 0 0 8px rgba(255,209,102,0)}}
 .ec-intro-cap{padding:12px clamp(14px,3vw,28px) 18px;text-align:center;min-height:74px}
 .ec-intro-cap h1{margin:0 0 4px;font-size:clamp(18px,2.8vw,32px);line-height:1.15;color:#fff}
 .ec-intro-cap p{margin:0;color:#cfe2f3;font-size:clamp(13px,1.4vw,16px)}
 .ec-intro-bar{height:4px;background:#ffd166;width:0}
 .ec-intro-track{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.12)}
-@media (prefers-reduced-motion:reduce){.ec-intro-stage img{transition:opacity .2s}.ec-intro-stage img.on{transform:none}}
+@media (prefers-reduced-motion:reduce){.ec-intro-stage img.on{animation:none}}
 </style>
 </head>
 <body>
@@ -1118,40 +1121,39 @@ dash.draw('riesgos', function (el) {
 <script>
 (function(){
   var box=document.getElementById('ec-intro'); if(!box) return;
-  var seen=false; try{ seen=sessionStorage.getItem('erdb-intro')==='1'; }catch(e){}
-  if(seen) return;
   var figs=[].slice.call(document.querySelectorAll('#panel-cartografia .ec-mfig img')); if(!figs.length) return;
   var caps=[
     ['El Cusco perdió 127 600 ha de bosque entre 2001 y 2024','El 78,5 % en La Convención y el 52 % en los últimos ocho años.'],
     ['Áreas protegidas y sitios de la Unesco','Machu Picchu y el Manu: Patrimonio Mundial en el corazón del departamento.'],
     ['Ecorregiones y vacíos de conservación','El 99 % de los sitios prioritarios del Sernanp está fuera de las áreas protegidas.']];
   var stage=document.getElementById('ec-intro-stage'), h=document.getElementById('ec-intro-h'), p=document.getElementById('ec-intro-p'), bar=document.getElementById('ec-intro-bar');
-  var play=document.getElementById('ec-intro-play'), mute=document.getElementById('ec-intro-mute'), skip=document.getElementById('ec-intro-skip');
-  var imgs=figs.map(function(f){ var im=new Image(); im.decoding='async'; im.src=f.getAttribute('src'); im.alt=f.getAttribute('alt')||''; stage.appendChild(im); return im; });
+  var mute=document.getElementById('ec-intro-mute'), skip=document.getElementById('ec-intro-skip'), play=document.getElementById('ec-intro-play');
+  if(play) play.hidden=true;
+  var imgs=figs.map(function(f){ var im=new Image(); im.src=f.getAttribute('src'); im.alt=f.getAttribute('alt')||''; stage.appendChild(im); return im; });
   var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var STEP=reduce?1200:2400, TOTAL=STEP*imgs.length, done=false, started=false, timers=[], music=!!window.ecAndina;
+  var STEP=reduce?1500:2500, TOTAL=STEP*imgs.length, done=false, timers=[], t0=performance.now(), sound=false;
   box.hidden=false; document.documentElement.style.overflow='hidden';
-  imgs[0].classList.add('on');
   function show(i){ imgs.forEach(function(im,k){ im.classList.toggle('on',k===i); }); if(caps[i]){ h.textContent=caps[i][0]; p.textContent=caps[i][1]; } }
   function close(){ if(done) return; done=true; timers.forEach(clearTimeout); if(window.ecAndina) window.ecAndina.stop();
-    box.classList.add('is-out'); document.documentElement.style.overflow=''; try{ sessionStorage.setItem('erdb-intro','1'); }catch(e){}
-    setTimeout(function(){ box.hidden=true; }, 650); }
-  function start(withMusic){ if(started||done) return; started=true; play.hidden=true;
-    if(withMusic && window.ecAndina){ mute.hidden=false; }
-    imgs.forEach(function(_,i){ timers.push(setTimeout(function(){ show(i); }, i*STEP)); });
-    bar.style.transition='width '+TOTAL+'ms linear'; requestAnimationFrame(function(){ requestAnimationFrame(function(){ bar.style.width='100%'; }); });
-    timers.push(setTimeout(close, TOTAL+200)); }
-  function startWithGesture(){ if(started) return; if(window.ecAndina){ window.ecAndina.play(0).then(function(ok){ start(ok); }); } else start(false); }
-  play.addEventListener('click', function(e){ e.stopPropagation(); startWithGesture(); });
+    box.classList.add('is-out'); document.documentElement.style.overflow=''; setTimeout(function(){ box.hidden=true; }, 650); }
+  function setMute(state){ mute.hidden=false; if(state==='on'){ mute.textContent='♪ Música: sí'; mute.classList.remove('is-ask'); }
+    else if(state==='ask'){ mute.textContent='♪ Activar música'; mute.classList.add('is-ask'); }
+    else { mute.textContent='♪ Música: no'; mute.classList.remove('is-ask'); } }
+  function tryMusic(){ if(!window.ecAndina || sound || done) return; var off=(performance.now()-t0)/1000;
+    window.ecAndina.play(off).then(function(ok){ if(done) return; if(ok){ sound=true; setMute('on'); } else setMute('ask'); }).catch(function(){ setMute('ask'); }); }
+  /* los mapas arrancan de inmediato */
+  show(0);
+  imgs.forEach(function(_,i){ if(i) timers.push(setTimeout(function(){ show(i); }, i*STEP)); });
+  bar.style.transition='width '+TOTAL+'ms linear'; requestAnimationFrame(function(){ requestAnimationFrame(function(){ bar.style.width='100%'; }); });
+  timers.push(setTimeout(close, TOTAL+300));
+  timers.push(setTimeout(close, 15000));
+  /* musica: automatica si el navegador lo permite; si no, con el primer clic o tecla */
+  if(window.ecAndina){ setMute('ask'); tryMusic(); } else mute.hidden=true;
+  mute.addEventListener('click', function(e){ e.stopPropagation(); if(sound){ window.ecAndina.stop(); sound=false; setMute('off'); } else tryMusic(); });
   skip.addEventListener('click', function(e){ e.stopPropagation(); close(); });
-  mute.addEventListener('click', function(e){ e.stopPropagation(); if(window.ecAndina) window.ecAndina.stop(); mute.textContent='♪ Música: no'; mute.disabled=true; });
-  box.addEventListener('click', function(){ if(!started) startWithGesture(); });
+  box.addEventListener('click', function(e){ if(e.target===skip) return; if(!sound) tryMusic(); });
   document.addEventListener('keydown', function onk(e){ if(done){ document.removeEventListener('keydown', onk); return; }
-    if(e.key==='Escape'){ close(); } else if((e.key==='Enter'||e.key===' ') && !started){ e.preventDefault(); startWithGesture(); } });
-  if(music){
-    window.ecAndina.play(0).then(function(ok){ if(ok){ start(true); } else { play.hidden=false; try{ play.focus({preventScroll:true}); }catch(e){}
-      timers.push(setTimeout(function(){ if(!started) start(false); }, 10000)); } });
-  } else start(false);
+    if(e.key==='Escape') close(); else if(!sound) tryMusic(); });
 })();
 </script>
 

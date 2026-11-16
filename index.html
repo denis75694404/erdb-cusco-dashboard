@@ -107,33 +107,42 @@ window.dash = (function () {
 .ec-ms-thumb:focus-visible,.ec-ms-cta:focus-visible,.ec-ms-main:focus-visible{outline:2px solid #ffd166;outline-offset:3px}
 .ec-ms-cta{all:unset;cursor:pointer;margin-top:16px;display:inline-flex;align-items:center;gap:8px;background:#ffd166;color:#0a2a1c;font-weight:700;border-radius:999px;padding:10px 18px}
 .ec-ms-cta:hover{background:#ffe08f}
-.ec-ms-main{all:unset;cursor:zoom-in;display:block;position:relative;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 20px 60px rgba(0,0,0,.45);transform:perspective(1200px) rotateY(-6deg) rotateX(2deg);transition:transform .6s}
-.ec-ms-main:hover{transform:perspective(1200px) rotateY(0) rotateX(0) scale(1.01)}
-.ec-ms-main img{display:block;width:100%;height:auto;animation:ecReveal 1.4s cubic-bezier(.2,.7,.2,1) both}
-@keyframes ecReveal{from{transform:scale(1.07);filter:saturate(.4) blur(3px)}to{transform:scale(1);filter:none}}
-.ec-ms-badge{position:absolute;top:10px;left:10px;background:#0069B4;color:#fff;font-size:11px;font-weight:700;letter-spacing:.06em;padding:4px 8px;border-radius:6px}
+.ec-ms-main{all:unset;cursor:zoom-in;display:block;position:relative;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 14px 36px rgba(0,0,0,.4);transition:transform .4s}
+.ec-ms-main:hover{transform:translateY(-3px)}
+.ec-ms-main img{display:block;width:100%;height:auto;animation:ecReveal .9s ease-out both}
+@keyframes ecReveal{from{opacity:.25;transform:scale(1.03)}to{opacity:1;transform:scale(1)}}
+.ec-ms-badge{display:inline-block;margin:0 0 8px;background:#0069B4;color:#fff;font-size:11px;font-weight:700;letter-spacing:.06em;padding:4px 8px;border-radius:6px}
 .ec-tabs .ec-tab.ec-tab-new{position:relative}
 .ec-tabs .ec-tab.ec-tab-new::after{content:"";position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:#ffb703;box-shadow:0 0 0 0 rgba(255,183,3,.7);animation:ecPulse 1.8s infinite}
 @keyframes ecPulse{0%{box-shadow:0 0 0 0 rgba(255,183,3,.7)}70%{box-shadow:0 0 0 8px rgba(255,183,3,0)}100%{box-shadow:0 0 0 0 rgba(255,183,3,0)}}
 @media (max-width:760px){.ec-mapshow{grid-template-columns:1fr}.ec-ms-main{transform:none}}
 @media (prefers-reduced-motion:reduce){.ec-mapshow::after,.ec-ms-main img,.ec-tab-new::after{animation:none}.ec-ms-main{transform:none}}
 </style>
+
 <style>
-.ec-intro{font-family:var(--font-anthropic-sans,system-ui,'Segoe UI',sans-serif);position:fixed;inset:0;z-index:9999;background:#04121f;display:flex;align-items:center;justify-content:center;overflow:hidden;opacity:1;transition:opacity .7s ease}
+.ec-intro{font-family:var(--font-anthropic-sans,system-ui,'Segoe UI',sans-serif);position:fixed;inset:0;z-index:9999;background:#04121f;color:#fff;
+  display:grid;grid-template-rows:auto minmax(0,1fr) auto;opacity:1;transition:opacity .6s ease}
 .ec-intro.is-out{opacity:0;pointer-events:none}
-.ec-intro-stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
-.ec-intro-stage img{position:absolute;max-width:94vw;max-height:84vh;width:auto;height:auto;border-radius:10px;box-shadow:0 30px 90px rgba(0,0,0,.6);opacity:0;transform:scale(1.12);transition:opacity .55s ease,transform 2.2s cubic-bezier(.15,.7,.2,1)}
-.ec-intro-stage img.on{opacity:1;transform:scale(1)}
-.ec-intro-top{position:absolute;top:0;left:0;right:0;padding:18px 26px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(#04121fee,#04121f00);color:#fff;z-index:2}
+.ec-intro-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px clamp(14px,3vw,28px)}
 .ec-intro-brand{font-weight:800;letter-spacing:.14em;font-size:13px;color:#ffd166}
-.ec-intro-skip{all:unset;cursor:pointer;color:#fff;border:1px solid rgba(255,255,255,.45);border-radius:999px;padding:7px 14px;font-size:13px}
-.ec-intro-snd{all:unset;cursor:pointer;color:#04121f;background:#ffd166;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:700;margin-right:8px}
-.ec-intro-snd[hidden]{display:none}
-.ec-intro-skip:hover,.ec-intro-skip:focus-visible{background:rgba(255,255,255,.15);outline:none}
-.ec-intro-cap{position:absolute;left:0;right:0;bottom:0;padding:22px 28px 30px;background:linear-gradient(#04121f00,#04121ff2 55%);color:#fff;z-index:2}
-.ec-intro-cap h1{margin:0 0 4px;font-size:clamp(20px,3.4vw,38px);line-height:1.15;color:#fff}
-.ec-intro-cap p{margin:0;color:#cfe2f3;font-size:clamp(13px,1.5vw,17px)}
-.ec-intro-bar{position:absolute;left:0;bottom:0;height:4px;background:#ffd166;width:0;z-index:3}
+.ec-intro-btns{display:flex;gap:8px;align-items:center}
+.ec-intro-skip,.ec-intro-mute{all:unset;cursor:pointer;color:#fff;border:1px solid rgba(255,255,255,.45);border-radius:999px;padding:7px 14px;font-size:13px}
+.ec-intro-skip:hover,.ec-intro-mute:hover,.ec-intro-skip:focus-visible,.ec-intro-mute:focus-visible{background:rgba(255,255,255,.15);outline:none}
+.ec-intro-stage{position:relative;min-height:0;margin:0 clamp(10px,3vw,40px)}
+.ec-intro-stage img{position:absolute;inset:0;margin:auto;max-width:100%;max-height:100%;width:auto;height:auto;border-radius:10px;
+  box-shadow:0 18px 50px rgba(0,0,0,.5);opacity:0;transform:scale(1.04);transition:opacity .5s ease,transform 2.4s ease-out;will-change:opacity,transform}
+.ec-intro-stage img.on{opacity:1;transform:scale(1)}
+.ec-intro-play{all:unset;cursor:pointer;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;background:#ffd166;color:#04121f;
+  font-weight:800;font-size:clamp(16px,2.2vw,22px);border-radius:999px;padding:16px 28px;box-shadow:0 10px 40px rgba(0,0,0,.45);text-align:center}
+.ec-intro-play small{display:block;font-weight:600;font-size:12px;opacity:.75;margin-top:2px}
+.ec-intro-play:hover,.ec-intro-play:focus-visible{background:#ffe08f;outline:3px solid #fff;outline-offset:3px}
+.ec-intro-play[hidden]{display:none}
+.ec-intro-mute[hidden],.ec-intro-skip[hidden]{display:none}
+.ec-intro-cap{padding:12px clamp(14px,3vw,28px) 18px;text-align:center;min-height:74px}
+.ec-intro-cap h1{margin:0 0 4px;font-size:clamp(18px,2.8vw,32px);line-height:1.15;color:#fff}
+.ec-intro-cap p{margin:0;color:#cfe2f3;font-size:clamp(13px,1.4vw,16px)}
+.ec-intro-bar{height:4px;background:#ffd166;width:0}
+.ec-intro-track{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.12)}
 @media (prefers-reduced-motion:reduce){.ec-intro-stage img{transition:opacity .2s}.ec-intro-stage img.on{transform:none}}
 </style>
 </head>
@@ -183,11 +192,14 @@ window.ecAndina=(function(){
 })();
 </script>
 <div class="ec-intro" id="ec-intro" role="dialog" aria-label="Presentación de la cartografía" hidden>
-  <div class="ec-intro-top"><span class="ec-intro-brand">Illariy · ERDB Cusco</span><span><button type="button" class="ec-intro-snd" id="ec-intro-snd" hidden>♪ Activar música</button><button type="button" class="ec-intro-skip" id="ec-intro-skip">Saltar ›</button></span></div>
-  <div class="ec-intro-stage" id="ec-intro-stage"></div>
+  <div class="ec-intro-top"><span class="ec-intro-brand">Illariy · ERDB Cusco</span>
+    <span class="ec-intro-btns"><button type="button" class="ec-intro-mute" id="ec-intro-mute" hidden>♪ Música: sí</button><button type="button" class="ec-intro-skip" id="ec-intro-skip">Saltar ›</button></span></div>
+  <div class="ec-intro-stage" id="ec-intro-stage"><button type="button" class="ec-intro-play" id="ec-intro-play" hidden>▶ Iniciar presentación con música<small>Cartografía preliminar elaborada en ArcGIS</small></button></div>
   <div class="ec-intro-cap"><h1 id="ec-intro-h">Cartografía preliminar elaborada en ArcGIS</h1><p id="ec-intro-p">Datos oficiales y abiertos al servicio de la Estrategia Regional de Diversidad Biológica del Cusco.</p></div>
-  <div class="ec-intro-bar" id="ec-intro-bar"></div>
+  <div class="ec-intro-track"><div class="ec-intro-bar" id="ec-intro-bar"></div></div>
 </div>
+
+
 
 <div id="dash-root">
 
@@ -399,7 +411,7 @@ details.ec-notes summary{cursor:pointer;font-weight:var(--cds-font-weight-medium
       </div>
       <button type="button" class="ec-ms-cta" id="ec-ms-cta">Ver la cartografía completa →</button>
     </div>
-    <button type="button" class="ec-ms-main" id="ec-ms-main" aria-label="Ampliar mapa"><span class="ec-ms-badge">Mapa preliminar</span><img alt="Mapa de pérdida de bosque en el Cusco, 2001-2024"></button>
+    <div><span class="ec-ms-badge">Mapa preliminar · clic para ampliar</span><button type="button" class="ec-ms-main" id="ec-ms-main" aria-label="Ampliar mapa"><img alt="Mapa de pérdida de bosque en el Cusco, 2001-2024"></button></div>
   </section>
 
 
@@ -1089,11 +1101,11 @@ dash.draw('riesgos', function (el) {
   var sh=document.getElementById('vitrina-mapas'); if(!sh) return;
   var src={}; document.querySelectorAll('#panel-cartografia .ec-mfig').forEach(function(f){ var im=f.querySelector('img'); if(im) src[f.dataset.m]={s:im.getAttribute('src'),a:im.getAttribute('alt')}; });
   var main=document.querySelector('#ec-ms-main img');
-  function pick(m){ if(!src[m]) return; main.style.animation='none'; void main.offsetWidth; main.style.animation=''; main.src=src[m].s; main.alt=src[m].a; main.dataset.m=m;
+  function pick(m){ if(!src[m]) return; main.decoding='async'; main.style.animation='none'; requestAnimationFrame(function(){ main.style.animation=''; }); main.src=src[m].s; main.alt=src[m].a; main.dataset.m=m;
     sh.querySelectorAll('.ec-ms-thumb').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.m===m?'true':'false'); }); }
   sh.querySelectorAll('.ec-ms-thumb').forEach(function(b){ var im=b.querySelector('img'); if(src[b.dataset.m]) im.src=src[b.dataset.m].s; b.addEventListener('click',function(){ pick(b.dataset.m); }); });
   pick('a');
-  var auto=setInterval(function(){ var o=['a','b','c']; pick(o[(o.indexOf(main.dataset.m)+1)%3]); }, 6000);
+  var auto=setInterval(function(){ if(document.hidden) return; var o=['a','b','c']; pick(o[(o.indexOf(main.dataset.m)+1)%3]); }, 7000);
   sh.addEventListener('pointerenter',function(){ clearInterval(auto); }, {once:true});
   var tabs=[].slice.call(document.querySelectorAll('[role="tab"]'));
   function goCarto(){ var k=tabs.findIndex(function(t){return t.id==='tab-cartografia';}); if(k>=0 && window.EC_showTab) window.EC_showTab(k,true); }
@@ -1108,32 +1120,40 @@ dash.draw('riesgos', function (el) {
   var box=document.getElementById('ec-intro'); if(!box) return;
   var seen=false; try{ seen=sessionStorage.getItem('erdb-intro')==='1'; }catch(e){}
   if(seen) return;
-  var figs=[].slice.call(document.querySelectorAll('#panel-cartografia .ec-mfig img'));
-  if(!figs.length) return;
+  var figs=[].slice.call(document.querySelectorAll('#panel-cartografia .ec-mfig img')); if(!figs.length) return;
   var caps=[
     ['El Cusco perdió 127 600 ha de bosque entre 2001 y 2024','El 78,5 % en La Convención y el 52 % en los últimos ocho años.'],
     ['Áreas protegidas y sitios de la Unesco','Machu Picchu y el Manu: Patrimonio Mundial en el corazón del departamento.'],
     ['Ecorregiones y vacíos de conservación','El 99 % de los sitios prioritarios del Sernanp está fuera de las áreas protegidas.']];
   var stage=document.getElementById('ec-intro-stage'), h=document.getElementById('ec-intro-h'), p=document.getElementById('ec-intro-p'), bar=document.getElementById('ec-intro-bar');
-  var imgs=figs.map(function(f){ var im=document.createElement('img'); im.src=f.getAttribute('src'); im.alt=f.getAttribute('alt')||''; stage.appendChild(im); return im; });
+  var play=document.getElementById('ec-intro-play'), mute=document.getElementById('ec-intro-mute'), skip=document.getElementById('ec-intro-skip');
+  var imgs=figs.map(function(f){ var im=new Image(); im.decoding='async'; im.src=f.getAttribute('src'); im.alt=f.getAttribute('alt')||''; stage.appendChild(im); return im; });
   var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var STEP=reduce?1100:2400, TOTAL=STEP*imgs.length, done=false, timers=[];
+  var STEP=reduce?1200:2400, TOTAL=STEP*imgs.length, done=false, started=false, timers=[], music=!!window.ecAndina;
   box.hidden=false; document.documentElement.style.overflow='hidden';
+  imgs[0].classList.add('on');
   function show(i){ imgs.forEach(function(im,k){ im.classList.toggle('on',k===i); }); if(caps[i]){ h.textContent=caps[i][0]; p.textContent=caps[i][1]; } }
-  function close(){ if(done) return; done=true; timers.forEach(clearTimeout); if(window.ecAndina) window.ecAndina.stop(); box.classList.add('is-out'); document.documentElement.style.overflow='';
-    try{ sessionStorage.setItem('erdb-intro','1'); }catch(e){}
-    setTimeout(function(){ box.hidden=true; }, 750); }
-  imgs.forEach(function(_,i){ timers.push(setTimeout(function(){ show(i); }, i*STEP)); });
-  bar.style.transition='width '+TOTAL+'ms linear'; requestAnimationFrame(function(){ requestAnimationFrame(function(){ bar.style.width='100%'; }); });
-  timers.push(setTimeout(close, TOTAL+150));
-  if(window.ecAndina){ var snd=document.getElementById('ec-intro-snd'), t0=performance.now();
-    window.ecAndina.play(0).then(function(ok){ if(!ok){ snd.hidden=false; } });
-    snd.addEventListener('click', function(e){ e.stopPropagation(); snd.hidden=true; window.ecAndina.play((performance.now()-t0)/1000); }); }
-  document.getElementById('ec-intro-skip').addEventListener('click', close);
-  box.addEventListener('click', function(e){ if(e.target.closest && e.target.closest('#ec-intro-snd')) return; close(); });
-  document.addEventListener('keydown', function(e){ if(e.key==='Escape'||e.key===' '||e.key==='Enter') close(); }, {once:true});
-  try{ document.getElementById('ec-intro-skip').focus({preventScroll:true}); }catch(e){}
+  function close(){ if(done) return; done=true; timers.forEach(clearTimeout); if(window.ecAndina) window.ecAndina.stop();
+    box.classList.add('is-out'); document.documentElement.style.overflow=''; try{ sessionStorage.setItem('erdb-intro','1'); }catch(e){}
+    setTimeout(function(){ box.hidden=true; }, 650); }
+  function start(withMusic){ if(started||done) return; started=true; play.hidden=true;
+    if(withMusic && window.ecAndina){ mute.hidden=false; }
+    imgs.forEach(function(_,i){ timers.push(setTimeout(function(){ show(i); }, i*STEP)); });
+    bar.style.transition='width '+TOTAL+'ms linear'; requestAnimationFrame(function(){ requestAnimationFrame(function(){ bar.style.width='100%'; }); });
+    timers.push(setTimeout(close, TOTAL+200)); }
+  function startWithGesture(){ if(started) return; if(window.ecAndina){ window.ecAndina.play(0).then(function(ok){ start(ok); }); } else start(false); }
+  play.addEventListener('click', function(e){ e.stopPropagation(); startWithGesture(); });
+  skip.addEventListener('click', function(e){ e.stopPropagation(); close(); });
+  mute.addEventListener('click', function(e){ e.stopPropagation(); if(window.ecAndina) window.ecAndina.stop(); mute.textContent='♪ Música: no'; mute.disabled=true; });
+  box.addEventListener('click', function(){ if(!started) startWithGesture(); });
+  document.addEventListener('keydown', function onk(e){ if(done){ document.removeEventListener('keydown', onk); return; }
+    if(e.key==='Escape'){ close(); } else if((e.key==='Enter'||e.key===' ') && !started){ e.preventDefault(); startWithGesture(); } });
+  if(music){
+    window.ecAndina.play(0).then(function(ok){ if(ok){ start(true); } else { play.hidden=false; try{ play.focus({preventScroll:true}); }catch(e){}
+      timers.push(setTimeout(function(){ if(!started) start(false); }, 10000)); } });
+  } else start(false);
 })();
 </script>
+
 </body>
 </html>
